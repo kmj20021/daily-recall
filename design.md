@@ -50,10 +50,12 @@
 | `database` | 데이터베이스 | 정규화, 인덱스, 트랜잭션/격리수준, 락 |
 | `java` | 언어/런타임(Java) | JVM, GC, 컬렉션, 동시성 |
 | `spring` | 프레임워크(Spring) | DI/IoC, AOP, 트랜잭션, JPA |
-| `web_backend` | 웹/백엔드 일반 | REST, 인증/인가, 캐싱, 멱등성, 세션/토큰 |
-| `frontend` | 프론트엔드 연관 | 브라우저 렌더링, CSR/SSR, 스토리지, 보안(XSS/CSRF) |
 | `infra` | 인프라/배포 | Docker, CI/CD, 클라우드 기초, 모니터링 |
-| `system_design` | 시스템 디자인 | 확장성, 캐시 전략, 메시지큐 (심화) |
+| `server_ops` | 서버 운영/명령어 | 모니터링(top/uptime), 메모리·디스크(free/df/du), 네트워크(ss/curl), systemd, 로그(journalctl), 원격(ssh/rsync), cron, 컨테이너(docker) |
+
+> **현재 출제 범위 축소(사용자 요청):** `web_backend`·`frontend`·`system_design`은 택소노미에서 제거했고,
+> `CATEGORY_WEIGHTS`를 `{"server_ops": 1.0}`으로 두어 **서버 운영/명령어만 출제**한다. 나머지 카테고리는
+> 택소노미에 남아 있으나 가중치에 없어 선택되지 않는다(복구하려면 `taxonomy.py`의 주석 참고).
 
 ---
 

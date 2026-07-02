@@ -107,38 +107,6 @@
       "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/Spring/%5BSpring%20Data%20JPA%5D%20%EB%8D%94%ED%8B%B0%20%EC%B2%B4%ED%82%B9%20(Dirty%20Checking).md"
     }
   ],
-  "web_backend": [
-    {
-      "q": "REST API란 무엇이며 RESTful하다고 부르기 위한 조건은 무엇인가요?",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/%5BWeb%5D%20REST%20API.md"
-    },
-    {
-      "q": "쿠키(Cookie)와 세션(Session)의 차이는 무엇이며, 인증 상태를 유지할 때 각각 어떻게 쓰이나요?",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/Cookie%20%26%20Session.md"
-    },
-    {
-      "q": "JWT(JSON Web Token)의 구조(Header.Payload.Signature)와 토큰 기반 인증 흐름을 설명하세요.",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/JWT(JSON%20Web%20Token).md"
-    },
-    {
-      "q": "인증(Authentication)과 인가(Authorization)의 차이를 설명하세요.",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/%EC%9D%B8%EC%A6%9D%EB%B0%A9%EC%8B%9D.md"
-    }
-  ],
-  "frontend": [
-    {
-      "q": "브라우저가 URL 입력부터 화면 렌더링까지 동작하는 과정을 설명하세요.",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%20%EB%8F%99%EC%9E%91%20%EB%B0%A9%EB%B2%95.md"
-    },
-    {
-      "q": "CSR(Client Side Rendering)과 SSR(Server Side Rendering)의 차이와 각각의 장단점을 설명하세요.",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/CSR%20%26%20SSR.md"
-    },
-    {
-      "q": "CSRF와 XSS 공격의 차이는 무엇이며 각각 어떻게 방어하나요?",
-      "src": "https://github.com/gyoogle/tech-interview-for-developer/blob/master/Web/CSRF%20%26%20XSS.md"
-    }
-  ],
   "infra": [
     {
       "q": "컨테이너(Container)와 가상머신(VM)의 차이는 무엇이며, 컨테이너가 더 가벼운 이유를 설명하세요.",
@@ -157,26 +125,34 @@
       "src": "https://prometheus.io/docs/introduction/overview/"
     }
   ],
-  "system_design": [
+  "server_ops": [
     {
-      "q": "CAP 정리(CAP theorem)를 설명하고, 분산 시스템에서 일관성(Consistency)과 가용성(Availability) 사이의 트레이드오프를 설명하세요.",
-      "src": "https://github.com/donnemartin/system-design-primer#cap-theorem"
+      "q": "서버가 갑자기 느려졌다는 제보를 받았습니다. 가장 먼저 부하 평균(load average)을 확인하려면 어떤 명령을 쓰고, 출력되는 세 숫자는 각각 무엇을 의미하며, 이 값이 '높다'고 판단하는 기준은 무엇인가요?",
+      "src": "data/server-engineer-commands.md#1-시스템-모니터링"
     },
     {
-      "q": "캐시 갱신 전략(cache-aside, write-through, write-back)을 비교하고 각각의 트레이드오프를 설명하세요.",
-      "src": "https://github.com/donnemartin/system-design-primer#cache"
+      "q": "'디스크가 꽉 찼다'는 알림을 받았습니다. 어떤 명령으로 어느 파티션이 찼는지 확인하고, 이어서 용량을 잡아먹는 디렉터리를 어떻게 추적하나요? (df와 du의 역할 차이 포함)",
+      "src": "data/server-engineer-commands.md#3-디스크--스토리지"
     },
     {
-      "q": "메시지 큐(message queue)를 이용한 비동기 처리가 시스템 확장성과 안정성에 주는 이점을 설명하세요.",
-      "src": "https://github.com/donnemartin/system-design-primer#asynchronism"
+      "q": "특정 포트에서 서비스가 리스닝(listening) 중인지 확인하려면 예전 netstat 대신 요즘은 어떤 명령을 쓰며, 자주 쓰는 플래그(-tuln)는 각각 무엇을 의미하나요?",
+      "src": "data/server-engineer-commands.md#4-네트워크"
     },
     {
-      "q": "데이터베이스 샤딩(sharding)과 복제(replication)의 차이는 무엇이며 각각 어떤 문제를 해결하나요?",
-      "src": "https://github.com/donnemartin/system-design-primer#sharding"
+      "q": "nginx 프로세스가 죽었습니다. systemctl로 상태를 확인하고, 재시작한 뒤, 부팅 시 자동 시작되도록 설정하려면 각각 어떤 명령을 쓰나요?",
+      "src": "data/server-engineer-commands.md#5-서비스-관리-systemd"
     },
     {
-      "q": "로드 밸런서의 Layer 4 방식과 Layer 7 방식의 차이를 설명하세요.",
-      "src": "https://github.com/donnemartin/system-design-primer#load-balancer"
+      "q": "systemd로 관리되는 서비스의 로그를 실시간으로 보면서 최근 10분 구간만 필터링하려면 journalctl을 어떻게 쓰나요? tail -f로 파일을 직접 보는 것과의 차이는 무엇인가요?",
+      "src": "data/server-engineer-commands.md#6-로그"
+    },
+    {
+      "q": "원격 서버로 대용량 디렉터리를 매일 반복 백업합니다. scp 대신 rsync를 선호하는 이유와 자주 쓰는 -avz 플래그의 의미를 설명하세요.",
+      "src": "data/server-engineer-commands.md#8-원격-접속--파일-전송"
+    },
+    {
+      "q": "\"서버가 느려요/죽었어요\" 제보를 받았을 때 원인을 좁혀가는 점검 순서(부하 → 자원(CPU/메모리/디스크) → 네트워크 → 서비스 → 로그)를 각 단계에서 실제로 치는 명령과 함께 설명하세요.",
+      "src": "data/server-engineer-commands.md#트러블슈팅-사고-흐름"
     }
   ]
 }

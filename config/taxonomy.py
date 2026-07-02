@@ -8,17 +8,20 @@ CATEGORIES = {
     "database":      ("데이터베이스",     ["정규화", "인덱스", "트랜잭션/격리수준", "락"]),
     "java":          ("언어/런타임(Java)", ["JVM", "GC", "컬렉션", "동시성"]),
     "spring":        ("프레임워크(Spring)", ["DI/IoC", "AOP", "트랜잭션", "JPA"]),
-    "web_backend":   ("웹/백엔드 일반",   ["REST", "인증/인가", "캐싱", "멱등성", "세션/토큰"]),
-    "frontend":      ("프론트엔드 연관",  ["브라우저 렌더링", "CSR/SSR", "스토리지", "보안(XSS/CSRF)"]),
     "infra":         ("인프라/배포",      ["Docker", "CI/CD", "클라우드 기초", "모니터링"]),
-    "system_design": ("시스템 디자인",    ["확장성", "캐시 전략", "메시지큐"]),
+    "server_ops":    ("서버 운영/명령어",  ["시스템 모니터링(top/uptime)", "메모리·디스크(free/df/du)",
+                                          "네트워크(ss/curl/dig)", "systemd 서비스", "로그(journalctl/tail)",
+                                          "원격·전송(ssh/rsync)", "cron 자동화", "컨테이너(docker)"]),
 }
 
 # 정본 slug 목록
 SLUGS = list(CATEGORIES.keys())
 
-# 균등 가중치(약점 보강 시에만 조정). slug -> weight
-CATEGORY_WEIGHTS = {slug: 1.0 for slug in SLUGS}
+# 출제 가중치. slug -> weight.
+# 현재는 서버 운영/명령어 학습에만 집중하도록 server_ops만 출제(사용자 요청).
+# _weighted_choice는 이 dict의 키 중에서만 고르므로, 여기 없는 카테고리는 출제되지 않는다.
+# 다시 균등 랜덤으로 되돌리려면: CATEGORY_WEIGHTS = {slug: 1.0 for slug in SLUGS}
+CATEGORY_WEIGHTS = {"server_ops": 1.0}
 
 # 난이도 단계 (정본 표기)
 DIFFICULTIES = ["기초", "중급", "심화"]
