@@ -1,4 +1,4 @@
-"""generator: GenerationContext -> QAItem(JSON). forced tool use로 구조화 출력 보장.
+"""generator: GenerationContext -> QAItem(JSON). Gemini JSON 모드로 구조화 출력 보장.
 
 QAItem 계약:
   {category, difficulty, question, concepts[], answer_core, answer_deep, follow_ups[]}
@@ -7,6 +7,7 @@ follow_ups는 선택(빈 배열 허용).
 포함하고, 언어 누락 시 plain으로 렌더된다(P3 변환기 규약).
 """
 from __future__ import annotations
+import json
 from typing import Any
 
 from config import settings, taxonomy
@@ -28,10 +29,21 @@ QAITEM_SCHEMA: dict[str, Any] = {
                  "answer_core", "answer_deep"],
 }
 
-_TOOL = {
-    "name": "emit_qaitem",
-    "description": "생성한 면접 질문/답안을 QAItem 구조로 반환한다.",
-    "input_schema": QAITEM_SCHEMA,
+# Gemini JSON 모드 응답 스키마(OpenAPI 서브셋). minLength/minItems는 미지원이라
+# 길이/개수 제약은 validate()가 담당하고, 여기선 타입·enum·필수만 강제한다.
+_RESPONSE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "category": {"type": "string", "enum": taxonomy.SLUGS},
+        "difficulty": {"type": "string", "enum": taxonomy.DIFFICULTIES},
+        "question": {"type": "string"},
+        "concepts": {"type": "array", "items": {"type": "string"}},
+        "answer_core": {"type": "string"},
+        "answer_deep": {"type": "string"},
+        "follow_ups": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["category", "difficulty", "question", "concepts",
+                 "answer_core", "answer_deep"],
 }
 
 SYSTEM_PROMPT = (
@@ -46,7 +58,7 @@ SYSTEM_PROMPT = (
     "- 코드 예시가 필요하면 answer 문자열 안에 표준 마크다운 코드펜스(```언어)로 넣는다.\n"
     "- 표(markdown table, `| ... |` 문법)는 절대 쓰지 않는다. 비교·대조는 불릿 리스트"
     "('- 항목 → 설명' 형태)로 표현한다. (렌더러가 표를 지원하지 않아 깨진다.)\n"
-    "- 반드시 emit_qaitem 도구로만 결과를 반환한다."
+    "- 결과는 지정된 JSON 스키마(QAItem)에 맞는 JSON 객체 하나로만 반환한다."
 )
 
 
@@ -94,20 +106,32 @@ def validate(item: dict) -> list[str]:
 
 
 def _call_api(ctx: GenerationContext, model: str) -> dict:
-    import anthropic  # 지연 import: dry-run --mock 시 미설치여도 동작
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    resp = client.messages.create(
+    from google import genai  # 지연 import: dry-run --mock 시 미설치여도 동작
+    from google.genai import types
+
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    resp = client.models.generate_content(
         model=model,
-        max_tokens=settings.MAX_TOKENS,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": build_user_prompt(ctx)}],
-        tools=[_TOOL],
-        tool_choice={"type": "tool", "name": "emit_qaitem"},
+        contents=build_user_prompt(ctx),
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            max_output_tokens=settings.MAX_TOKENS,
+            response_mime_type="application/json",
+            response_schema=_RESPONSE_SCHEMA,
+            # 2.5 flash 계열은 thinking이 출력 토큰을 잠식 → 구조화 단답이라 비활성.
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+        ),
     )
-    for block in resp.content:
-        if getattr(block, "type", None) == "tool_use" and block.name == "emit_qaitem":
-            return dict(block.input)
-    raise GenerationError("응답에 emit_qaitem tool_use 블록이 없음")
+    text = resp.text
+    if not text:
+        raise GenerationError("Gemini 응답이 비어 있음(차단/토큰초과 가능)")
+    try:
+        item = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise GenerationError(f"JSON 파싱 실패: {e}")
+    if not isinstance(item, dict):
+        raise GenerationError(f"JSON 최상위가 객체가 아님: {type(item).__name__}")
+    return item
 
 
 def _generate_with(ctx: GenerationContext, model: str) -> dict:
