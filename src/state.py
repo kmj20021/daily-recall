@@ -35,6 +35,19 @@ class EmptyState(State):
         return False
 
 
+def _is_missing_select_option(e: Exception) -> bool:
+    """'select option ... not found for property' 검증 오류인지 판별.
+
+    아직 어떤 select 옵션도 쓰이지 않은 신규 카테고리를 필터할 때 Notion이 내는 400.
+    이 특정 오류만 삼키고(=0건 취급) 다른 API 오류는 전파하기 위해 좁게 매칭한다.
+    """
+    try:
+        from notion_client.errors import APIResponseError
+    except ImportError:
+        return False
+    return isinstance(e, APIResponseError) and "not found for property" in str(e)
+
+
 def resolve_data_source_id(client, db_id: str) -> str:
     """Notion 2025-09 API: DB → data source id 해석(단일 소스 가정, 첫 소스 사용)."""
     db = client.databases.retrieve(database_id=db_id)
@@ -81,10 +94,18 @@ class NotionState(State):
     def _daily_in_category(self, category: str) -> list[dict]:
         from config import taxonomy
         disp = taxonomy.display_name(category)
-        return self._query({"and": [
-            {"property": "Kind", "select": {"equals": "daily"}},
-            {"property": "Category", "select": {"equals": disp}},
-        ]})
+        try:
+            return self._query({"and": [
+                {"property": "Kind", "select": {"equals": "daily"}},
+                {"property": "Category", "select": {"equals": disp}},
+            ]})
+        except Exception as e:  # noqa: BLE001
+            # 아직 이 카테고리로 발행된 적이 없으면 Notion Category select에 해당 옵션이
+            # 없어 필터 쿼리가 400(validation_error)을 낸다. 논리적으로 0건이므로 빈 목록.
+            # (옵션은 첫 발행 시 페이지 생성으로 자동 추가된다.) 그 외 오류는 그대로 전파.
+            if _is_missing_select_option(e):
+                return []
+            raise
 
     def count(self, category: str) -> int:
         return len(self._daily_in_category(category))
